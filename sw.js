@@ -1,23 +1,21 @@
-const CACHE_NAME = "dev-tracker-v1";
+const CACHE_NAME = "devtracker-v2";
 
-const FILES_TO_CACHE = [
-  "./",
-  "./index.html",
-  "./manifest.json"
-];
-
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(FILES_TO_CACHE);
-    })
-  );
+self.addEventListener("install", (e) => {
+  self.skipWaiting();
 });
 
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
-  );
+self.addEventListener("activate", (e) => {
+  caches.keys().then((keys) => {
+    return Promise.all(
+      keys.map((key) => {
+        if (key !== CACHE_NAME) {
+          return caches.delete(key);
+        }
+      })
+    );
+  });
+});
+
+self.addEventListener("fetch", (e) => {
+  e.respondWith(fetch(e.request));
 });
