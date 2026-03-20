@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2a5298">
+  <title>Edeh Dev Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: white;
+    }
+
+    .container {
+      padding: 20px;
+      padding-bottom: 80px;
+    }
+
+    header {
+      background: #0f172a;
+      padding: 10px;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      background: #2e4c8f;
+      color: white;
+    }
+
+    /* SECTIONS FIXED */
+    #home-section,
+    #lessons-section,
+    #progress-section,
+    #achievements-section {
+      display: none;
+    }
+
+    .active {
+      display: block !important;
+    }
+
+    /* NAV */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #0f172a;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+    }
+
+    .bottom-nav button {
+      background: none;
+      border: none;
+      font-size: 22px;
+      color: white;
+    }
+    
+    button {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  padding: 12px 18px;
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.2);
+}content://com.android.externalstorage.documents/tree/primary%3Aindex.html%2Findex.html::primary:index.html/index.html/TechJourney/index.html
+
+    .progress-container {
+      background: rgba(255,255,255,0.2);
+      height: 10px;
+      border-radius: 10px;
+    }
+
+    .progress-bar {
+      height: 10px;
+      width: 0%;
+      background: cyan;
+      border-radius: 10px;
+    }
+    
+    .bottom-nav button.active-nav {
+  color: #4facfe;
+  transform: scale(1.2);
+}
+
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- HOME -->
+  <div id="home-section" class="active">
+    <header>
+      <h1 id="dayTitle"></h1>
+      <p id="greeting"></p>
+    </header>
+
+    <p id="time"></p>
+    <p id="gymNote"></p>
+    <p id="discipline"></p>
+    <p id="consistency"></p>
+
+    <button onclick="updateNote()">Update Daily Note</button>
+    
+   <button onclick="editName()">Change Name</button>
+  </div>
+
+  <!-- LESSONS -->
+  <div id="lessons-section">
+    <h3>🧠 Lessons</h3>
+    <ul id="movie-lesson"></ul>
+    <button onclick="updateLesson()">Add Lesson</button>
+    <button onclick="clearLessons()">Clear Lessons</button>
+  </div>
+
+  <!-- PROGRESS -->
+  <div id="progress-section">
+    <p id="dev-level"></p>
+
+    <div class="progress-container">
+      <div class="progress-bar" id="progress-bar"></div>
+      <div class="progress-bar" id="progress-bar">
+  <span id="progress-text"></span>
+</div>
+    </div>
+
+    <p id="streak"></p>
+
+    <button onclick="increaseGymDay()">+ Gym Day</button>
+    <button onclick="resetGymDay()">Reset Gym</button>
+  </div>
+
+  <!-- ACHIEVEMENTS -->
+  <div id="achievements-section">
+    <h2>🏆 Achievements</h2>
+    <ul id="achievements-list"></ul>
+  </div>
+
+</div>
+
+
+<!-- NAV (ONLY ONE) -->
+<div class="bottom-nav">
+  <button onclick="showSection('home-section')">🏠</button>
+  <button onclick="showSection('lessons-section')">🧠</button>
+  <button onclick="showSection('progress-section')">📈</button>
+  <button onclick="showSection('achievements-section')">🏆</button>
+</div>
+
+<script>
+let name = localStorage.getItem("name") || "Developer";
+
+let gymDay = parseInt(localStorage.getItem("gymDay")) || 8;
+let streak = parseInt(localStorage.getItem("streak")) || 0;
+
+// NAVIGATION (GLOBAL FIX)
+window.showSection = function(sectionId) {
+  const sections = [
+    "home-section",
+    "lessons-section",
+    "progress-section",
+    "achievements-section"
+  ];
+
+  sections.forEach(id => {
+    document.getElementById(id).classList.remove("active");
+  });
+
+  document.getElementById(sectionId).classList.add("active");
+
+  // 🔥 NAV HIGHLIGHT
+  const buttons = document.querySelectorAll(".bottom-nav button");
+  buttons.forEach(btn => btn.classList.remove("active-nav"));
+
+  const map = {
+    "home-section": 0,
+    "lessons-section": 1,
+    "progress-section": 2,
+    "achievements-section": 3
+  };
+
+  buttons[map[sectionId]].classList.add("active-nav");
+};
+
+// DAY COUNT
+function getDayCount() {
+  let startDate = new Date("2025-12-14");
+  let today = new Date();
+  let diff = today - startDate;
+  return Math.floor(diff / (1000 * 60 * 60 * 24)) + 1;
+}
+
+// MAIN UPDATE
+function updateMain() {
+  let day = getDayCount();
+
+  document.getElementById("dayTitle").innerText =
+    "Day " + day + " — Hello, my name is " + name;
+
+  document.getElementById("gymNote").innerText =
+    "Day " + gymDay + " at the gym";
+
+  document.getElementById("discipline").innerText =
+    localStorage.getItem("disciplineText") || "Discipline over trends";
+
+  document.getElementById("consistency").innerText =
+    "🎉 Day " + day + " — consistency over quick results";
+
+  document.getElementById("streak").innerText =
+    "🔥 Streak: " + streak;
+
+  document.getElementById("progress-bar").style.width =
+    (day % 100) + "%";
+    
+    let progressText = document.getElementById("progress-text");
+if (progressText) {
+  progressText.innerText = (day % 100) + "%";
+}
+
+  updateAchievements(day);
+}
+
+// LESSONS
+function updateLesson() {
+  let lesson = prompt("Enter lesson:");
+  if (!lesson) return;
+
+  let lessons = JSON.parse(localStorage.getItem("movieLessons")) || [];
+  lessons.push(lesson);
+
+  localStorage.setItem("movieLessons", JSON.stringify(lessons));
+  showLessons();
+}
+
+function showLessons() {
+  let lessons = JSON.parse(localStorage.getItem("movieLessons")) || [];
+  let box = document.getElementById("movie-lesson");
+
+  box.innerHTML = "";
+
+  lessons.forEach((lesson, i) => {
+    let li = document.createElement("li");
+    li.textContent = lesson;
+
+    li.onclick = () => {
+      lessons.splice(i, 1);
+      localStorage.setItem("movieLessons", JSON.stringify(lessons));
+      showLessons();
+    };
+
+    box.appendChild(li);
+  });
+}
+
+function clearLessons() {
+  localStorage.removeItem("movieLessons");
+  showLessons();
+}
+
+// NOTE
+function updateNote() {
+  let text = prompt("Enter new discipline:");
+  if (text) {
+    localStorage.setItem("disciplineText", text);
+    document.getElementById("discipline").innerText = text;
+  }
+}
+
+// GYM
+function increaseGymDay() {
+  gymDay++;
+  streak++;
+
+  localStorage.setItem("gymDay", gymDay);
+  localStorage.setItem("streak", streak);
+
+  updateMain();
+}
+
+function resetGymDay() {
+  gymDay = 8;
+  streak = 0;
+
+  localStorage.setItem("gymDay", gymDay);
+  localStorage.setItem("streak", streak);
+
+  updateMain();
+}
+
+function editName() {
+  let newName = prompt("Enter your name:");
+  if (newName) {
+    localStorage.setItem("name", newName);
+    name = newName;
+    updateMain();
+    updateGreeting();
+  }
+}
+
+// ACHIEVEMENTS
+function updateAchievements(day) {
+  let box = document.getElementById("achievements-list");
+
+  let text = "";
+  if (day >= 10) text += "<li>🥉 10 days</li>";
+  if (day >= 30) text += "<li>🥈 30 days</li>";
+  if (day >= 60) text += "<li>🥇 60 days</li>";
+
+  if (!text) text = "<li>Keep going 💪</li>";
+
+  box.innerHTML = text;
+}
+
+// START
+window.onload = function () {
+  updateMain();
+  showLessons();
+  showSection("home-section");
+};
+
+</script>
+
+</body>
+</html>
